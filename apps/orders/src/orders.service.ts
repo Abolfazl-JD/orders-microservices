@@ -5,13 +5,14 @@ import { Order, OrderDocument } from './order.schema';
 import { CreateOrderDto } from './dtos/create-order.dto';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
+import { BILLING_SERVICE } from './constants/services';
 
 @Injectable()
 export class OrdersService {
 
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
-    @Inject("billing") private billingClient: ClientProxy
+    @Inject(BILLING_SERVICE) private billingClient: ClientProxy
   ) { }
 
   async createOrder(orderInfo: CreateOrderDto) {

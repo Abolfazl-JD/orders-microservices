@@ -1,15 +1,20 @@
-import { Controller, Get } from '@nestjs/common';
-import { EventPattern, Payload } from '@nestjs/microservices';
+import { RMQService } from '@app/common';
+import { Controller } from '@nestjs/common';
+import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { OrderDocument } from '../../orders/src/order.schema';
 import { BillingService } from './billing.service';
 
 @Controller()
 export class BillingController {
-  constructor(private readonly billingService: BillingService) {}
+  constructor(
+    private readonly billingService: BillingService,
+    private readonly rmqService: RMQService
+  ) { }
+
 
   @EventPattern('order-created')
-  handleOrderCreated(@Payload() data: OrderDocument) {
-    console.log(data)
-    return data
+  handleOrderCreated(@Payload() data: OrderDocument, @Ctx() context: RmqContext) {
+    this.billingService.bill(data)
+    this.rmqService.ack(context)
   }
 }

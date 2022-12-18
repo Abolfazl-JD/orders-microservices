@@ -1,18 +1,12 @@
+import { RMQService } from '@app/common';
 import { NestFactory } from '@nestjs/core';
-import { Transport } from '@nestjs/microservices';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { BillingModule } from './billing.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(BillingModule);
-  app.connectMicroservice({
-    transport: Transport.RMQ,
-    options: {
-      urls: ['http://localhost:15672'],
-      queue: 'billing-queue',
-      noAck: false,
-      persistent: true,
-    },
-  })
-  await app.listen(3000);
+  const rmqService = app.get(RMQService)
+  app.connectMicroservice<MicroserviceOptions>(rmqService.getOptions('BILLING'))
+  await app.startAllMicroservices();
 }
 bootstrap();
